@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/nginx.dockerfile
+    ports:
+      - 80:80
+    volumes:
+      - ./src:/var/www/html
+    depends_on:
+      - mysql
+      - php
+  mysql:
+    image: mariadb:10.5
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_DATABASE: symfony
+      MYSQL_USER: symfony
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: secret
+    volumes:
+      - ./docker/mysql:/var/lib/mysql
+  php:
+    build:
+      context: .
+      dockerfile: docker/php.dockerfile
+    volumes:
+      - ./src:/var/www/html
+  composer:
+    build:
+      context: .
+      dockerfile: docker/composer.dockerfile
+    volumes:
+      - ./src:/var/www/html
+    working_dir: /var/www/html
+  mailer:
+    image: schickling/mailcatcher
+    ports: ["1025", "1080"]
